@@ -17,6 +17,11 @@ build/
 *.log
 logs/
 
+# Next.js
+.next/
+out/
+next-env.d.ts
+
 # IDE & OS (AIOX)
 .DS_Store
 Thumbs.db

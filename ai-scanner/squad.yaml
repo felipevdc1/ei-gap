@@ -1,0 +1,28 @@
+name: ai-scanner
+version: 1.0.0
+tested: false
+updated_at: "2026-03-23"
+short-title: AI Scanner
+description: >-
+  Squad de diagnóstico empresarial com IA. Analisa negócios através de
+  perguntas estruturadas, mapeia processos, identifica oportunidades de
+  aplicação de IA e gera relatório com 10 oportunidades rankeadas por
+  impacto vs esforço. Motor de conversão para consultoria de implementação.
+  Agents carregam frameworks proprietários de extração de conhecimento,
+  estratégia de negócios e arquitetura de processos.
+author: AIOS Team
+entry_agent: scanner-chief
+slashPrefix: aiScanner
+
+settings:
+  activation:
+    show_ecosystem_report: false
+    show_greeting: true
+    show_quick_commands: true
+
+metadata:
+  version: "1.0.0"
+  domain: "business-diagnosis"
+  purpose: "lead-generation"
+  conversion_target: "claude-code-consulting"
+  score: 0

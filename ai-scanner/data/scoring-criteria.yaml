@@ -1,0 +1,104 @@
+# Scoring Criteria — Criterios fixos pra scoring de oportunidades
+# Usado pelo process-architect pra scoring tecnico
+# REGRA: Score NUNCA pode ser gut feeling. Sempre criterio documentado.
+
+version: 1.0.0
+
+dimensions:
+  impact:
+    weight: 0.35
+    description: "Quanto impacta o resultado do negocio"
+    scale:
+      10: "Afeta receita diretamente — core business"
+      9: "Afeta receita significativamente"
+      8: "Reduz custo operacional significativo (>20%)"
+      7: "Reduz custo operacional moderado (10-20%)"
+      6: "Melhoria incremental mensuravel"
+      5: "Melhoria incremental moderada"
+      4: "Nice to have com impacto mensuravel"
+      3: "Nice to have com impacto baixo"
+      2: "Cosmetic com algum beneficio"
+      1: "Cosmetic sem impacto real"
+
+  effort:
+    weight: 0.25
+    description: "Quanto esforco pra implementar (invertido: 10 = pouco esforco)"
+    scale:
+      10: "Plug and play — configuracao minima (horas)"
+      9: "Configuracao simples (1-3 dias)"
+      8: "Integracao simples (1-2 semanas)"
+      7: "Integracao com customizacao (2-3 semanas)"
+      6: "Integracao moderada (2-4 semanas)"
+      5: "Projeto pequeno (1-2 meses)"
+      4: "Projeto medio (2-3 meses)"
+      3: "Projeto significativo (3-4 meses)"
+      2: "Projeto complexo (4-6 meses)"
+      1: "Projeto massivo (6+ meses)"
+
+  feasibility:
+    weight: 0.20
+    description: "Viabilidade tecnica considerando maturidade da empresa"
+    scale:
+      10: "Nenhuma barreira — ferramentas prontas, dados disponiveis"
+      9: "Barreiras minimas — adaptacao minima"
+      8: "Ferramentas existem, dados precisam de limpeza"
+      7: "Ferramentas existem, integracao customizada simples"
+      6: "Ferramentas existem, integracao customizada moderada"
+      5: "Precisa combinar multiplas ferramentas"
+      4: "Precisa infraestrutura adicional"
+      3: "Barreiras significativas de dados/infra"
+      2: "Precisa redesign significativo"
+      1: "Quase inviavel sem transformacao completa"
+
+  automation_readiness:
+    weight: 0.20
+    description: "Quao pronto o processo esta pra automacao"
+    scale:
+      10: "100% repetitivo, regras claras, dados estruturados"
+      9: "95%+ repetitivo com excecoes raras e documentadas"
+      8: "90%+ repetitivo com excecoes previsíveis"
+      7: "80%+ repetitivo com excecoes moderadas"
+      6: "70% repetitivo, 30% julgamento"
+      5: "50/50 repetitivo e criativo"
+      4: "30% repetitivo, 70% julgamento"
+      3: "Majoritariamente julgamento com algum padrao"
+      2: "Quase todo julgamento humano"
+      1: "100% criativo, sem padrao"
+
+composite_formula:
+  formula: "(impact × 0.35) + (effort × 0.25) + (feasibility × 0.20) + (automation_readiness × 0.20)"
+  max_score: 10.0
+  thresholds:
+    excellent: 8.5  # Quick win — implementar primeiro
+    good: 7.0       # Alto potencial — implementar em seguida
+    moderate: 5.5   # Potencial moderado — avaliar
+    low: 4.0        # Baixo potencial — postergar
+    skip: 0.0       # Inviavel — nao incluir no report
+
+automation_decision_matrix:
+  AUTOMATE:
+    condition: "frequency >= 'semanal' AND impact >= 7 AND automation_readiness >= 7"
+    description: "Automatizar completamente com IA"
+  DELEGATE:
+    condition: "frequency >= 'semanal' AND impact >= 7 AND automation_readiness < 7"
+    description: "IA assiste, humano decide"
+  KEEP_MANUAL:
+    condition: "frequency < 'semanal' AND impact >= 7"
+    description: "Manter manual — julgamento humano necessario"
+  ELIMINATE:
+    condition: "impact < 4"
+    description: "Eliminar processo — nao vale automatizar"
+
+guardrails_required:
+  any_automation:
+    - "Escape manual (humano assume se IA falha)"
+    - "Log de todas acoes/decisoes da IA"
+    - "Idempotency (repetir nao causa efeito duplo)"
+  high_impact:
+    - "Threshold de confianca (< 80% → escala pra humano)"
+    - "Review periodico de acuracidade"
+    - "Rollback em caso de erro"
+  customer_facing:
+    - "Humano aprova antes de enviar (primeiras 2 semanas)"
+    - "Monitoramento de satisfacao"
+    - "Fallback pra humano em tempo real"

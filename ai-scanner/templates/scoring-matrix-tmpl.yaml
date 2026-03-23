@@ -1,0 +1,66 @@
+# Scoring Matrix Template
+# Usado pelo process-architect pra scoring tecnico
+
+name: scoring-matrix
+version: 1.0.0
+
+business_context:
+  sector: "{{sector}}"
+  size: "{{size}}"
+  tech_maturity: "{{tech_maturity}}"
+
+opportunities:
+  - name: "{{opportunity_name}}"
+    process_source: "{{process_name}}"
+    category: "{{category}}"  # automacao | analise | geracao | integracao | decisao
+
+    scores:
+      impact:
+        value: 0  # 1-10
+        criteria: ""
+      effort:
+        value: 0  # 1-10 (invertido: 10 = pouco esforco)
+        criteria: ""
+      feasibility:
+        value: 0  # 1-10
+        criteria: ""
+      automation_readiness:
+        value: 0  # 1-10
+        criteria: ""
+
+    composite_score: 0  # (impact×0.35)+(effort×0.25)+(feasibility×0.20)+(readiness×0.20)
+
+    automation_decision: ""  # AUTOMATE | DELEGATE | ELIMINATE | KEEP_MANUAL
+
+    diagnostic:
+      skip_step_possible: false
+      error_detection: false
+      vacation_dependency: false
+      gap_time: ""
+      steps_count: 0
+      green_flags: 0
+      red_flags: 0
+
+    guardrails:
+      - idempotency: ""
+      - logging: ""
+      - manual_escape: ""
+      - confidence_threshold: ""
+
+    implementation:
+      complexity: ""  # baixa | media | alta
+      time_estimate: ""
+      tech_requirements: []
+
+    roi:
+      range: ""  # R$X - R$Y/ano
+      loss_monthly: ""  # R$X/mes
+      quick_win: false
+
+summary:
+  total_opportunities: 0
+  automate_count: 0
+  delegate_count: 0
+  eliminate_count: 0
+  keep_manual_count: 0
+  average_score: 0

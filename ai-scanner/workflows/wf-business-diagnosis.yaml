@@ -1,0 +1,167 @@
+name: wf-business-diagnosis
+version: 1.0.0
+description: >-
+  Workflow completo de diagnostico empresarial com IA.
+  5 fases: Intake → Extraction → Scoring → Ranking → Report.
+  Fluxo unidirecional com veto conditions por fase.
+type: workflow
+trigger: "*scan or *quick-scan command"
+estimated_duration: "15-30 min (interactive)"
+
+phases:
+  - id: phase_1_intake
+    name: "Business Intake"
+    executor: scanner-chief
+    task: collect-business-info.md
+    resources:
+      - data/sector-profiles.yaml
+    purpose: "Coletar informacoes estruturadas do negocio"
+    input: "User describes their business"
+    output:
+      format: BUSINESS_PROFILE
+      fields:
+        - sector
+        - company_size
+        - tech_maturity
+        - main_processes
+        - pain_points
+        - current_tools
+        - budget_range
+        - growth_goals
+    veto_conditions:
+      - "< 5 campos preenchidos → NAO prosseguir"
+      - "Setor nao identificado → pedir mais contexto"
+      - "< 3 processos mencionados → extrair mais"
+    checkpoint:
+      gate: "INTAKE_COMPLETE"
+      auto_check: true
+      pass_criteria: "Todos campos obrigatorios preenchidos"
+    duration: "5-10 min"
+
+  - id: phase_2_extraction
+    name: "Process Extraction & Classification"
+    executor: business-analyst
+    task: analyze-processes.md
+    resources:
+      - data/sector-profiles.yaml
+      - data/ai-opportunities-catalog.yaml
+    purpose: "Extrair e classificar processos do negocio"
+    input: BUSINESS_PROFILE
+    output:
+      format: PROCESS_MAP
+      fields:
+        - processes_mapped (min 5)
+        - classification_per_process (ouro/prata/bronze)
+        - pareto_analysis (4 zones)
+        - bottlenecks_identified
+    veto_conditions:
+      - "Processos genericos sem especificidade → LOOP"
+      - "Sem classificacao ouro/bronze → LOOP"
+      - "< 5 processos mapeados → continuar extracao"
+      - "Todos ouro → recalibrar (impossivel)"
+    checkpoint:
+      gate: "EXTRACTION_COMPLETE"
+      auto_check: true
+      pass_criteria: "5+ processos classificados com Pareto aplicado"
+    duration: "5-10 min"
+
+  - id: phase_3_scoring
+    name: "Technical Scoring"
+    executor: process-architect
+    task: score-ai-opportunities.md
+    resources:
+      - data/scoring-criteria.yaml
+      - data/ai-opportunities-catalog.yaml
+    purpose: "Scoring tecnico de cada oportunidade de IA"
+    input: PROCESS_MAP
+    output:
+      format: SCORED_OPPORTUNITIES
+      fields:
+        - opportunities_with_4d_score
+        - automation_decisions
+        - guardrails_per_opportunity
+        - diagnostic_results
+    veto_conditions:
+      - "Score sem criterios fixos → VETO"
+      - "Automacao sem guardrails → VETO"
+      - "Oportunidade inviavel pro porte → VETO"
+      - "Feasibility < 3 sem justificativa → VETO"
+    checkpoint:
+      gate: "SCORING_COMPLETE"
+      auto_check: true
+      pass_criteria: "Todas oportunidades com score composto + guardrails"
+    duration: "3-5 min"
+
+  - id: phase_4_ranking
+    name: "ROI Ranking & Loss Analysis"
+    executor: growth-strategist
+    task: rank-opportunities.md
+    resources:
+      - data/scoring-criteria.yaml
+    purpose: "Rankear por ROI e aplicar loss aversion"
+    input: SCORED_OPPORTUNITIES
+    output:
+      format: RANKED_OPPORTUNITIES
+      fields:
+        - ranked_list (top 10)
+        - roi_range_per_item
+        - total_roi_range
+        - loss_per_month_per_item
+        - total_loss_if_ignored
+        - conversion_elements
+    veto_conditions:
+      - "Sem ROI estimado por item → LOOP"
+      - "Sem loss aversion check → LOOP"
+      - "ROI inflado sem evidencia → VETO"
+      - "Ranking sem criterios → VETO"
+    checkpoint:
+      gate: "RANKING_COMPLETE"
+      auto_check: true
+      pass_criteria: "10 oportunidades rankeadas com ROI e loss analysis"
+    duration: "3-5 min"
+
+  - id: phase_5_report
+    name: "Report Assembly"
+    executor: scanner-chief
+    task: generate-report.md
+    resources:
+      - templates/report-tmpl.md
+      - templates/opportunity-card-tmpl.md
+    purpose: "Montar relatorio final com barreira estrategica"
+    input: RANKED_OPPORTUNITIES
+    output:
+      format: FINAL_REPORT
+      sections:
+        - executive_summary
+        - roi_total_highlight
+        - top_10_opportunities_table
+        - per_opportunity_detail
+        - loss_aversion_section
+        - next_steps_cta
+    veto_conditions:
+      - "Report sem ROI total → VETO"
+      - "Report com detalhes de implementacao → VETO (barreira quebrada)"
+      - "Report sem CTA pra consultoria → VETO"
+      - "Menos de 10 oportunidades → VETO"
+    checkpoint:
+      gate: "REPORT_COMPLETE"
+      auto_check: true
+      pass_criteria: "Report completo com barreira free/paid respeitada"
+    duration: "2-3 min"
+
+flow_rules:
+  - "Fluxo UNIDIRECIONAL — nada volta pra fase anterior"
+  - "Se fase falha veto → LOOP na mesma fase, nao regride"
+  - "Handoffs automaticos entre fases"
+  - "Cada fase DEVE completar checkpoint antes de prosseguir"
+  - "Scanner-chief coordena, nao executa analise profunda"
+
+quick_scan_mode:
+  description: "Versao reduzida com 5 perguntas essenciais"
+  changes:
+    phase_1: "5 perguntas em vez de formulario completo"
+    phase_2: "3 processos minimo em vez de 5"
+    phase_3: "Top 5 oportunidades em vez de scoring completo"
+    phase_4: "Top 5 ranking em vez de 10"
+    phase_5: "Report resumido"
+  duration: "5-10 min total"

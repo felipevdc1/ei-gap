@@ -1,0 +1,180 @@
+# AI Opportunities Catalog
+# Catalogo de oportunidades de IA por categoria
+# Usado pra enriquecer oportunidades identificadas no diagnostico
+
+version: 1.0.0
+
+categories:
+  automacao:
+    name: "Automacao de Processos"
+    description: "Substituir tarefas repetitivas por IA"
+    opportunities:
+      - name: "Atendimento automatizado (chatbot IA)"
+        typical_roi: "R$30.000 - R$120.000/ano"
+        effort: "baixa"
+        time_to_value: "1-2 semanas"
+        applicable_when: "80%+ das interacoes sao repetitivas"
+        tech: "LLM + WhatsApp API / chat widget"
+
+      - name: "Automacao de relatorios"
+        typical_roi: "R$25.000 - R$80.000/ano"
+        effort: "baixa"
+        time_to_value: "1-2 semanas"
+        applicable_when: "Equipe gasta 4h+/semana em relatorios manuais"
+        tech: "LLM + integracao com fontes de dados"
+
+      - name: "Automacao de email e follow-up"
+        typical_roi: "R$15.000 - R$50.000/ano"
+        effort: "baixa"
+        time_to_value: "1 semana"
+        applicable_when: "Follow-up manual consome 2h+/dia"
+        tech: "LLM + email API"
+
+      - name: "Processamento automatico de documentos"
+        typical_roi: "R$20.000 - R$70.000/ano"
+        effort: "media"
+        time_to_value: "2-4 semanas"
+        applicable_when: "Processam 50+ documentos/semana manualmente"
+        tech: "LLM + OCR"
+
+      - name: "Automacao de data entry"
+        typical_roi: "R$15.000 - R$45.000/ano"
+        effort: "baixa"
+        time_to_value: "1-2 semanas"
+        applicable_when: "Entrada manual de dados consome 3h+/dia"
+        tech: "LLM + integracao com sistemas"
+
+  analise:
+    name: "Analise de Dados com IA"
+    description: "Extrair insights de dados existentes"
+    opportunities:
+      - name: "Analise preditiva de churn/evasao"
+        typical_roi: "R$40.000 - R$150.000/ano"
+        effort: "media"
+        time_to_value: "2-4 semanas"
+        applicable_when: "Churn > 5%/mes e dados historicos disponiveis"
+        tech: "ML + dados de uso/pagamento"
+
+      - name: "Segmentacao inteligente de clientes"
+        typical_roi: "R$20.000 - R$80.000/ano"
+        effort: "media"
+        time_to_value: "2-3 semanas"
+        applicable_when: "Base de 500+ clientes sem segmentacao"
+        tech: "LLM/ML + CRM data"
+
+      - name: "Previsao de demanda/estoque"
+        typical_roi: "R$30.000 - R$100.000/ano"
+        effort: "media"
+        time_to_value: "3-4 semanas"
+        applicable_when: "Ruptura ou excesso de estoque frequentes"
+        tech: "ML + dados de vendas historicos"
+
+      - name: "Analise automatica de performance"
+        typical_roi: "R$15.000 - R$50.000/ano"
+        effort: "baixa"
+        time_to_value: "1-2 semanas"
+        applicable_when: "KPIs analisados manualmente"
+        tech: "LLM + dashboards existentes"
+
+      - name: "Deteccao de anomalias/fraude"
+        typical_roi: "R$25.000 - R$100.000/ano"
+        effort: "alta"
+        time_to_value: "4-8 semanas"
+        applicable_when: "Perdas por fraude/erro > R$5k/mes"
+        tech: "ML + dados transacionais"
+
+  geracao:
+    name: "Geracao de Conteudo com IA"
+    description: "Criar conteudo assistido por IA"
+    opportunities:
+      - name: "Geracao assistida de conteudo (posts, emails)"
+        typical_roi: "R$20.000 - R$60.000/ano"
+        effort: "baixa"
+        time_to_value: "1 semana"
+        applicable_when: "Produzem 10+ pecas/semana"
+        tech: "LLM + brand guidelines"
+
+      - name: "Descricoes de produto automaticas"
+        typical_roi: "R$15.000 - R$45.000/ano"
+        effort: "baixa"
+        time_to_value: "1 semana"
+        applicable_when: "Catalogo com 100+ SKUs"
+        tech: "LLM + dados de produto"
+
+      - name: "Elaboracao automatica de propostas"
+        typical_roi: "R$25.000 - R$70.000/ano"
+        effort: "media"
+        time_to_value: "2-3 semanas"
+        applicable_when: "Elaboram 5+ propostas/mes manualmente"
+        tech: "LLM + templates + CRM"
+
+      - name: "Resumo automatico de documentos/reunioes"
+        typical_roi: "R$10.000 - R$35.000/ano"
+        effort: "baixa"
+        time_to_value: "1 semana"
+        applicable_when: "10+ reunioes/semana sem ata estruturada"
+        tech: "LLM + transcricao de audio"
+
+      - name: "Geracao de materiais educacionais"
+        typical_roi: "R$20.000 - R$60.000/ano"
+        effort: "media"
+        time_to_value: "2-3 semanas"
+        applicable_when: "Criam cursos/treinamentos regularmente"
+        tech: "LLM + estrutura pedagogica"
+
+  integracao:
+    name: "Integracao Inteligente"
+    description: "Conectar sistemas com IA como intermediaria"
+    opportunities:
+      - name: "Hub de integracoes com IA (multi-sistema)"
+        typical_roi: "R$30.000 - R$90.000/ano"
+        effort: "media"
+        time_to_value: "3-4 semanas"
+        applicable_when: "3+ sistemas que nao conversam"
+        tech: "LLM + APIs dos sistemas"
+
+      - name: "Roteamento inteligente de leads/tickets"
+        typical_roi: "R$15.000 - R$50.000/ano"
+        effort: "baixa"
+        time_to_value: "1-2 semanas"
+        applicable_when: "Roteamento manual de 20+ itens/dia"
+        tech: "LLM + CRM/helpdesk"
+
+      - name: "Sincronizacao inteligente de dados"
+        typical_roi: "R$10.000 - R$35.000/ano"
+        effort: "media"
+        time_to_value: "2-3 semanas"
+        applicable_when: "Dados duplicados em sistemas diferentes"
+        tech: "LLM + ETL"
+
+  decisao:
+    name: "Suporte a Decisao"
+    description: "IA que assiste decisoes humanas"
+    opportunities:
+      - name: "Precificacao dinamica assistida"
+        typical_roi: "R$25.000 - R$80.000/ano"
+        effort: "media"
+        time_to_value: "2-4 semanas"
+        applicable_when: "100+ SKUs com pricing manual"
+        tech: "ML + dados de venda + concorrencia"
+
+      - name: "Qualificacao automatica de leads (lead scoring)"
+        typical_roi: "R$20.000 - R$70.000/ano"
+        effort: "baixa"
+        time_to_value: "1-2 semanas"
+        applicable_when: "50+ leads/mes sem qualificacao sistematica"
+        tech: "LLM/ML + CRM data"
+
+      - name: "Recomendacao inteligente de produtos"
+        typical_roi: "R$15.000 - R$60.000/ano"
+        effort: "media"
+        time_to_value: "2-3 semanas"
+        applicable_when: "Cross-sell/upsell manual ou inexistente"
+        tech: "ML + historico de compras"
+
+      - name: "Triagem inteligente (suporte/saude/juridico)"
+        typical_roi: "R$20.000 - R$55.000/ano"
+        effort: "media"
+        time_to_value: "2-3 semanas"
+        applicable_when: "Triagem manual consome 2h+/dia"
+        tech: "LLM + regras de negocio"

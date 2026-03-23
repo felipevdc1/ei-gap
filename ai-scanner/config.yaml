@@ -1,0 +1,41 @@
+name: ai-scanner
+version: 1.0.0
+type: squad
+tested: false
+updated_at: "2026-03-23"
+short-title: AI Scanner
+description: >-
+  Diagnóstico empresarial + oportunidades de IA.
+  Lead gen para consultoria de Claude Code.
+author: AIOS Team
+
+features:
+  business-diagnosis:
+    description: "Diagnóstico estruturado de negócios via perguntas por setor"
+    agents: ["scanner-chief", "business-analyst"]
+    tasks:
+      - collect-business-info
+      - analyze-processes
+
+  ai-opportunity-scoring:
+    description: "Scoring de oportunidades de IA por impacto x esforço"
+    agents: ["process-architect", "growth-strategist"]
+    tasks:
+      - score-ai-opportunities
+      - rank-opportunities
+
+  report-generation:
+    description: "Geração de relatório com barreira estratégica de entrega"
+    agents: ["scanner-chief", "growth-strategist"]
+    tasks:
+      - generate-report
+
+metadata:
+  version: "1.0.0"
+  stats:
+    agents: 4
+    tasks: 5
+    workflows: 1
+    templates: 3
+    data_files: 3
+    checklists: 1

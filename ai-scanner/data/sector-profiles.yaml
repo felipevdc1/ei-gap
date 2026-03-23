@@ -1,0 +1,218 @@
+# Sector Profiles — Perguntas especificas por setor
+# Usado pelo scanner-chief e business-analyst pra adaptar diagnostico
+
+version: 1.0.0
+
+sectors:
+  ecommerce:
+    name: "E-commerce"
+    keywords: ["loja online", "e-commerce", "ecommerce", "loja virtual", "shopify", "woocommerce"]
+    typical_processes:
+      - "Atendimento ao cliente (WhatsApp, chat, email)"
+      - "Gestao de estoque e pedidos"
+      - "Criacao de fotos/descricoes de produto"
+      - "Gestao de marketplace (ML, Amazon, Shopee)"
+      - "Email marketing e campanhas"
+      - "Analise de vendas e relatorios"
+      - "Logistica e rastreamento"
+      - "Precificacao e promocoes"
+    specific_questions:
+      - "Quantos pedidos processam por dia/semana?"
+      - "Quantos % de atendimento sao perguntas repetitivas?"
+      - "Como gerenciam estoque entre canais (loja + marketplace)?"
+      - "Como criam descricoes e fotos de novos produtos?"
+      - "Qual tempo medio de resposta ao cliente?"
+    high_roi_opportunities:
+      - "Atendimento automatizado (chatbot IA)"
+      - "Descricoes de produto com IA"
+      - "Gestao inteligente de estoque"
+      - "Segmentacao automatica de clientes"
+      - "Precificacao dinamica"
+
+  agencia_marketing:
+    name: "Agencia de Marketing Digital"
+    keywords: ["agencia", "marketing digital", "social media", "trafego pago", "performance"]
+    typical_processes:
+      - "Criacao de conteudo (posts, stories, reels)"
+      - "Gestao de campanhas de trafego"
+      - "Relatorios de performance"
+      - "Atendimento ao cliente (briefing, aprovacao)"
+      - "Planejamento editorial"
+      - "Analise de concorrencia"
+      - "Gestao de equipe e tarefas"
+      - "Prospeccao de novos clientes"
+    specific_questions:
+      - "Quantos clientes atendem simultaneamente?"
+      - "Quanto tempo gasta em relatorios por cliente/mes?"
+      - "Como funciona o fluxo briefing → criacao → aprovacao?"
+      - "Quanto conteudo produzem por semana por cliente?"
+      - "Como analisam performance e otimizam campanhas?"
+    high_roi_opportunities:
+      - "Automacao de relatorios de performance"
+      - "Geracao assistida de conteudo"
+      - "Analise automatica de campanhas"
+      - "Qualificacao automatica de leads"
+      - "Planejamento editorial com IA"
+
+  saas:
+    name: "SaaS / Tech"
+    keywords: ["saas", "software", "plataforma", "tech", "startup", "app"]
+    typical_processes:
+      - "Suporte ao cliente (tickets, chat)"
+      - "Onboarding de usuarios"
+      - "Desenvolvimento de features"
+      - "QA e testes"
+      - "Documentacao tecnica"
+      - "Analise de churn e retencao"
+      - "Sales pipeline management"
+      - "Billing e cobranca"
+    specific_questions:
+      - "Quantos tickets de suporte recebem por semana?"
+      - "Qual % de tickets sao resolvidos com FAQ existente?"
+      - "Como funciona o processo de onboarding?"
+      - "Qual a taxa de churn mensal?"
+      - "Como priorizam backlog de features?"
+    high_roi_opportunities:
+      - "Suporte automatizado com IA (L1)"
+      - "Onboarding inteligente e personalizado"
+      - "Analise preditiva de churn"
+      - "Documentacao automatica de codigo"
+      - "Qualificacao automatica de leads"
+
+  servicos_profissionais:
+    name: "Servicos Profissionais"
+    keywords: ["consultoria", "escritorio", "advocacia", "contabilidade", "arquitetura", "engenharia"]
+    typical_processes:
+      - "Elaboracao de propostas e orcamentos"
+      - "Gestao de projetos e tarefas"
+      - "Comunicacao com clientes"
+      - "Elaboracao de documentos e relatorios"
+      - "Controle financeiro e cobranca"
+      - "Gestao de agenda e reunioes"
+      - "Pesquisa e analise"
+      - "Prospeccao de novos clientes"
+    specific_questions:
+      - "Quanto tempo gasta em elaboracao de propostas?"
+      - "Quantos projetos gerenciam simultaneamente?"
+      - "Como funciona a comunicacao com cliente (email, reuniao, WhatsApp)?"
+      - "Quanto tempo gasta em pesquisa/analise por projeto?"
+      - "Como fazem cobranca e follow-up financeiro?"
+    high_roi_opportunities:
+      - "Geracao automatica de propostas"
+      - "Resumo inteligente de documentos"
+      - "Automacao de follow-up e cobranca"
+      - "Pesquisa assistida por IA"
+      - "Gestao inteligente de agenda"
+
+  varejo_fisico:
+    name: "Varejo Fisico"
+    keywords: ["loja", "varejo", "comercio", "ponto de venda", "pdv", "franquia"]
+    typical_processes:
+      - "Atendimento na loja"
+      - "Controle de estoque"
+      - "Gestao de funcionarios e escalas"
+      - "Compras e relacionamento com fornecedores"
+      - "Marketing local e promocoes"
+      - "Financeiro e fluxo de caixa"
+      - "Fidelizacao de clientes"
+      - "Analise de vendas"
+    specific_questions:
+      - "Quantas lojas/unidades operam?"
+      - "Como gerenciam estoque entre unidades?"
+      - "Como fazem escala de funcionarios?"
+      - "Qual canal principal de comunicacao com cliente?"
+      - "Como analisam vendas por produto/periodo?"
+    high_roi_opportunities:
+      - "Previsao de demanda e estoque inteligente"
+      - "Escala automatica de funcionarios"
+      - "Programa de fidelidade com IA"
+      - "Analise automatica de vendas"
+      - "Atendimento WhatsApp pos-venda"
+
+  industria:
+    name: "Industria / Manufatura"
+    keywords: ["industria", "fabrica", "manufatura", "producao", "logistica industrial"]
+    typical_processes:
+      - "Planejamento de producao"
+      - "Controle de qualidade"
+      - "Gestao de fornecedores"
+      - "Manutencao de equipamentos"
+      - "Logistica e expedicao"
+      - "Controle de estoque de materias-primas"
+      - "Relatorios de producao"
+      - "Seguranca do trabalho"
+    specific_questions:
+      - "Qual volume de producao diario/semanal?"
+      - "Como fazem controle de qualidade?"
+      - "Qual frequencia de manutencao de equipamentos?"
+      - "Como gerenciam fornecedores e compras?"
+      - "Quantas paradas nao programadas por mes?"
+    high_roi_opportunities:
+      - "Manutencao preditiva de equipamentos"
+      - "Controle de qualidade com visao computacional"
+      - "Previsao de demanda e planejamento"
+      - "Automacao de relatorios de producao"
+      - "Gestao inteligente de fornecedores"
+
+  educacao:
+    name: "Educacao / Infoprodutos"
+    keywords: ["curso", "escola", "faculdade", "infoproduto", "mentor", "coaching", "treinamento"]
+    typical_processes:
+      - "Criacao de conteudo educacional"
+      - "Atendimento a alunos"
+      - "Gestao de matriculas e pagamentos"
+      - "Correcao de atividades"
+      - "Marketing e vendas de cursos"
+      - "Acompanhamento de alunos"
+      - "Elaboracao de materiais"
+      - "Gestao de comunidade"
+    specific_questions:
+      - "Quantos alunos ativos?"
+      - "Quanto tempo gasta criando conteudo por semana?"
+      - "Como funciona o atendimento a alunos?"
+      - "Qual taxa de conclusao dos cursos?"
+      - "Como fazem vendas (funil, lancamento, perpetuo)?"
+    high_roi_opportunities:
+      - "Tutoria IA personalizada"
+      - "Correcao automatica de atividades"
+      - "Geracao assistida de conteudo"
+      - "Chatbot de atendimento a alunos"
+      - "Analise preditiva de evasao"
+
+  saude:
+    name: "Saude / Clinicas"
+    keywords: ["clinica", "hospital", "consultorio", "medico", "dentista", "psicólogo", "saude"]
+    typical_processes:
+      - "Agendamento de consultas"
+      - "Prontuario e registros"
+      - "Atendimento pre e pos consulta"
+      - "Faturamento e convenios"
+      - "Confirmacao de presenca"
+      - "Gestao de equipe medica"
+      - "Marketing e captacao de pacientes"
+      - "Compras de materiais"
+    specific_questions:
+      - "Quantas consultas/atendimentos por dia?"
+      - "Qual taxa de no-show (faltas)?"
+      - "Como fazem confirmacao de presenca?"
+      - "Quanto tempo gasta em burocracia de convenios?"
+      - "Como funciona captacao de novos pacientes?"
+    high_roi_opportunities:
+      - "Confirmacao automatica via WhatsApp"
+      - "Reducao de no-show com IA"
+      - "Automacao de faturamento de convenios"
+      - "Triagem inteligente pre-consulta"
+      - "Marketing automatizado para pacientes"
+
+# Setor generico (fallback)
+generic:
+  name: "Negocio Geral"
+  universal_questions:
+    - "Qual o setor e tamanho da empresa?"
+    - "Quais os 3 processos que mais consomem tempo?"
+    - "O que voces fazem IGUAL toda vez?"
+    - "Onde o trabalho TRAVA?"
+    - "O que fazem MANUALMENTE que poderia ser automatizado?"
+    - "O que impede crescer sem contratar?"
+    - "Que sistemas usam? Quais NAO conversam?"
+    - "Ja usam alguma IA?"
