@@ -34,27 +34,37 @@ export async function generateMetadata({
   }
 
   const report = storedReport.content
-  const roiMin = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(report.total_roi_min)
-  const roiMax = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(report.total_roi_max)
+
+  const title = `Diagnóstico ${report.company_name || 'Empresa'} | EI-GAP`
+
+  if (report.total_roi_min > 0 || report.total_roi_max > 0) {
+    const roiMin = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(report.total_roi_min)
+    const roiMax = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(report.total_roi_max)
+
+    return {
+      title,
+      description: `Setor: ${report.sector} | ROI Estimado: ${roiMin} — ${roiMax}`,
+      openGraph: {
+        title: `Diagnóstico IA — ${report.company_name}`,
+        description: `Setor: ${report.sector} | ROI Estimado: ${roiMin} — ${roiMax}`,
+        type: 'article',
+      },
+    }
+  }
 
   return {
-    title: `Diagnóstico ${report.company_name} | EI-GAP`,
-    description: `Setor: ${report.sector} | ROI Estimado: ${roiMin} — ${roiMax}`,
-    openGraph: {
-      title: `Diagnóstico IA — ${report.company_name}`,
-      description: `Setor: ${report.sector} | ROI Estimado: ${roiMin} — ${roiMax}`,
-      type: 'article',
-    },
+    title,
+    description: `Setor: ${report.sector || 'geral'}`,
   }
 }
 
@@ -71,29 +81,46 @@ export default async function ReportPage({ params }: PageProps) {
   if (storedReport) {
     const report = storedReport.content
 
+    // Detect if this is a partial report (no executive_summary or zero ROI from phase 3/4)
+    const isPartial = !report.executive_summary
+
     return (
       <main className="mx-auto max-w-4xl px-4 py-8 md:py-12">
+        {isPartial && (
+          <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            Este diagnóstico é parcial — alguns cálculos podem estar incompletos.
+          </div>
+        )}
+
         <ReportHeader report={report} />
 
         {/* Dopamine Sequence: ROI header -> Loss Aversion -> Top 10 -> Top 3 -> Cost of Inaction -> CTA */}
         <div className="space-y-6">
-          {/* E4b.S2a — Loss Aversion Section */}
-          <LossAversionSection
-            gains_summary={report.gains_summary}
-            losses_summary={report.losses_summary}
-            total_roi_min={report.total_roi_min}
-            total_roi_max={report.total_roi_max}
-            cost_of_inaction_monthly={report.cost_of_inaction_monthly}
-          />
+          {/* E4b.S2a — Loss Aversion Section (only show if we have meaningful data) */}
+          {(report.total_roi_min > 0 || report.total_roi_max > 0 || report.cost_of_inaction_monthly > 0) && (
+            <LossAversionSection
+              gains_summary={report.gains_summary}
+              losses_summary={report.losses_summary}
+              total_roi_min={report.total_roi_min}
+              total_roi_max={report.total_roi_max}
+              cost_of_inaction_monthly={report.cost_of_inaction_monthly}
+            />
+          )}
 
           {/* E4b.S2a — Opportunities Table (all 10) */}
-          <OpportunitiesTable opportunities={report.opportunities} />
+          {report.opportunities?.length > 0 && (
+            <OpportunitiesTable opportunities={report.opportunities} />
+          )}
 
           {/* E4b.S2a — Top 3 Deep Dive */}
-          <TopThreeDeepDive opportunities={report.opportunities} />
+          {report.opportunities?.length > 0 && (
+            <TopThreeDeepDive opportunities={report.opportunities} />
+          )}
 
-          {/* E4b.S2b — Cost of Inaction + CTA */}
-          <CostOfInaction monthlyLoss={report.cost_of_inaction_monthly} />
+          {/* E4b.S2b — Cost of Inaction + CTA (only show if we have the data) */}
+          {report.cost_of_inaction_monthly > 0 && (
+            <CostOfInaction monthlyLoss={report.cost_of_inaction_monthly} />
+          )}
           <ReportCta scanId={id} />
         </div>
       </main>

@@ -32,12 +32,14 @@ export function ReportHeader({ report }: ReportHeaderProps) {
         {report.sector}
       </span>
 
-      <div className="mt-4">
-        <p className="text-sm text-gray-500">ROI Total Estimado</p>
-        <p className="text-2xl font-bold text-green-700 md:text-3xl">
-          {formatBRL(report.total_roi_min)} — {formatBRL(report.total_roi_max)}
-        </p>
-      </div>
+      {(report.total_roi_min > 0 || report.total_roi_max > 0) && (
+        <div className="mt-4">
+          <p className="text-sm text-gray-500">ROI Total Estimado</p>
+          <p className="text-2xl font-bold text-green-700 md:text-3xl">
+            {formatBRL(report.total_roi_min)} — {formatBRL(report.total_roi_max)}
+          </p>
+        </div>
+      )}
     </header>
   )
 }

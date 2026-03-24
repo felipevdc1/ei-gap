@@ -2,8 +2,8 @@
 // EI-GAP — POST /api/scan-text — SSE Streaming Free-Text Scan Route
 // ---------------------------------------------------------------------------
 
-// Vercel serverless function timeout: 120s for the AI pipeline (5 LLM calls)
-export const maxDuration = 120
+// Vercel serverless function timeout: 600s for the AI pipeline (5 LLM calls with large prompts)
+export const maxDuration = 600
 
 import { NextResponse } from 'next/server'
 import { z } from 'zod'

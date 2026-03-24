@@ -41,8 +41,8 @@ export type LLMClient = (
 // Resilience constants
 // ---------------------------------------------------------------------------
 
-/** Total pipeline timeout in milliseconds (120 seconds) */
-const PIPELINE_TIMEOUT_MS = 120_000
+/** Total pipeline timeout in milliseconds (600 seconds / 10 minutes) */
+const PIPELINE_TIMEOUT_MS = 600_000
 
 /** Circuit breaker threshold — consecutive LLM call failures before abort */
 const CIRCUIT_BREAKER_THRESHOLD = 3
@@ -192,7 +192,7 @@ function sleep(ms: number): Promise<void> {
  * Runs the full 5-phase AI diagnosis pipeline as an async generator.
  *
  * Resilience features:
- * - Total pipeline timeout: 120s (aborts if exceeded, emits scan_error)
+ * - Total pipeline timeout: 600s (aborts if exceeded, emits scan_error)
  * - Max retries per phase: configurable via OPENROUTER_MAX_RETRIES (default 3)
  * - Circuit breaker: 3 consecutive LLM call failures → abort with clear error
  * - Fallback model: if primary fails with 429/500 → try OPENROUTER_FALLBACK_MODEL
@@ -239,6 +239,9 @@ export async function* runDiagnosis(
 
   let previousOutput: unknown = null
 
+  // Track whether a partial report has been saved (after phase 3+)
+  let partialReportSaved = false
+
   for (const phaseDef of PHASES) {
     // Check total pipeline timeout before starting a new phase
     if (Date.now() - pipelineStartTime >= PIPELINE_TIMEOUT_MS) {
@@ -249,6 +252,7 @@ export async function* runDiagnosis(
         phase: phaseDef.phase,
         name: phaseDef.name,
         error: errorMsg,
+        ...(partialReportSaved ? { reportId } : {}),
       }
       return
     }
@@ -277,6 +281,7 @@ export async function* runDiagnosis(
           phase: phaseDef.phase,
           name: phaseDef.name,
           error: errorMsg,
+          ...(partialReportSaved ? { reportId } : {}),
         }
         return
       }
@@ -290,6 +295,7 @@ export async function* runDiagnosis(
           phase: phaseDef.phase,
           name: phaseDef.name,
           error: errorMsg,
+          ...(partialReportSaved ? { reportId } : {}),
         }
         return
       }
@@ -397,6 +403,7 @@ export async function* runDiagnosis(
           phase: phaseDef.phase,
           name: phaseDef.name,
           error: errorMsg,
+          ...(partialReportSaved ? { reportId } : {}),
         }
         return
       }
@@ -410,6 +417,7 @@ export async function* runDiagnosis(
         phase: phaseDef.phase,
         name: phaseDef.name,
         error: errorMsg,
+        ...(partialReportSaved ? { reportId } : {}),
       }
       return
     }
@@ -426,9 +434,59 @@ export async function* runDiagnosis(
 
     // Chain output to next phase
     previousOutput = phaseResult
+
+    // Save partial report after phase 3 (scoring) — enables progressive delivery
+    if (phaseDef.phase === 3 && phaseResult && typeof phaseResult === 'object') {
+      const scored = phaseResult as { opportunities?: unknown[] }
+      try {
+        await store.saveReport(reportId, scanId, {
+          opportunities: (scored.opportunities ?? []).map((opp: unknown, i: number) => ({
+            ...(opp as Record<string, unknown>),
+            rank: i + 1,
+            roi_range_min: 0,
+            roi_range_max: 0,
+            loss_per_month: 0,
+            time_to_value: 'A calcular',
+            quick_win: false,
+          })),
+          executive_summary: '',
+          total_roi_min: 0,
+          total_roi_max: 0,
+          cost_of_inaction_monthly: 0,
+          gains_summary: 'Cálculo em andamento...',
+          losses_summary: 'Cálculo em andamento...',
+          sector: formData.sector || 'geral',
+          company_name: formData.company_name || '',
+        } as unknown as ScanReport)
+        partialReportSaved = true
+      } catch {
+        // Non-fatal — partial save is best-effort
+      }
+    }
+
+    // Save partial report after phase 4 (ranking) — overwrites phase 3 partial
+    if (phaseDef.phase === 4 && phaseResult && typeof phaseResult === 'object') {
+      const ranked = phaseResult as { opportunities?: unknown[]; total_roi_min?: number; total_roi_max?: number; cost_of_inaction_monthly?: number }
+      try {
+        await store.saveReport(reportId, scanId, {
+          opportunities: ranked.opportunities ?? [],
+          executive_summary: '',
+          total_roi_min: ranked.total_roi_min ?? 0,
+          total_roi_max: ranked.total_roi_max ?? 0,
+          cost_of_inaction_monthly: ranked.cost_of_inaction_monthly ?? 0,
+          gains_summary: 'Relatório sendo finalizado...',
+          losses_summary: 'Relatório sendo finalizado...',
+          sector: formData.sector || 'geral',
+          company_name: formData.company_name || '',
+        } as unknown as ScanReport)
+        partialReportSaved = true
+      } catch {
+        // Non-fatal — partial save is best-effort
+      }
+    }
   }
 
-  // All phases completed — save report and update status
+  // All phases completed — save final report and update status
   await store.saveReport(reportId, scanId, previousOutput as ScanReport)
   await store.updateScanStatus(scanId, 'completed')
 
@@ -516,12 +574,15 @@ export async function* runFreeTextDiagnosis(
 
   let previousOutput: unknown = null
 
+  // Track whether a partial report has been saved (after phase 3+)
+  let partialReportSaved = false
+
   for (const phaseDef of FREE_TEXT_PHASES) {
     // Check total pipeline timeout
     if (Date.now() - pipelineStartTime >= PIPELINE_TIMEOUT_MS) {
       const errorMsg = `Pipeline timeout: total execution exceeded ${PIPELINE_TIMEOUT_MS / 1000}s`
       await store.updateScanStatus(scanId, 'failed', errorMsg)
-      yield { type: 'scan_error', phase: phaseDef.phase, name: phaseDef.name, error: errorMsg }
+      yield { type: 'scan_error', phase: phaseDef.phase, name: phaseDef.name, error: errorMsg, ...(partialReportSaved ? { reportId } : {}) }
       return
     }
 
@@ -538,14 +599,14 @@ export async function* runFreeTextDiagnosis(
       if (consecutiveFailures >= CIRCUIT_BREAKER_THRESHOLD) {
         const errorMsg = `Pipeline aborted: circuit breaker tripped after ${CIRCUIT_BREAKER_THRESHOLD} consecutive LLM call failures`
         await store.updateScanStatus(scanId, 'failed', errorMsg)
-        yield { type: 'scan_error', phase: phaseDef.phase, name: phaseDef.name, error: errorMsg }
+        yield { type: 'scan_error', phase: phaseDef.phase, name: phaseDef.name, error: errorMsg, ...(partialReportSaved ? { reportId } : {}) }
         return
       }
 
       if (Date.now() - pipelineStartTime >= PIPELINE_TIMEOUT_MS) {
         const errorMsg = `Pipeline timeout: total execution exceeded ${PIPELINE_TIMEOUT_MS / 1000}s`
         await store.updateScanStatus(scanId, 'failed', errorMsg)
-        yield { type: 'scan_error', phase: phaseDef.phase, name: phaseDef.name, error: errorMsg }
+        yield { type: 'scan_error', phase: phaseDef.phase, name: phaseDef.name, error: errorMsg, ...(partialReportSaved ? { reportId } : {}) }
         return
       }
 
@@ -618,13 +679,13 @@ export async function* runFreeTextDiagnosis(
       if (consecutiveFailures >= CIRCUIT_BREAKER_THRESHOLD) {
         const errorMsg = `Pipeline aborted: circuit breaker tripped after ${CIRCUIT_BREAKER_THRESHOLD} consecutive LLM call failures`
         await store.updateScanStatus(scanId, 'failed', errorMsg)
-        yield { type: 'scan_error', phase: phaseDef.phase, name: phaseDef.name, error: errorMsg }
+        yield { type: 'scan_error', phase: phaseDef.phase, name: phaseDef.name, error: errorMsg, ...(partialReportSaved ? { reportId } : {}) }
         return
       }
 
       const errorMsg = `Phase ${phaseDef.name} failed after ${maxRetries} retries: ${lastError}`
       await store.updateScanStatus(scanId, 'failed', errorMsg)
-      yield { type: 'scan_error', phase: phaseDef.phase, name: phaseDef.name, error: errorMsg }
+      yield { type: 'scan_error', phase: phaseDef.phase, name: phaseDef.name, error: errorMsg, ...(partialReportSaved ? { reportId } : {}) }
       return
     }
 
@@ -643,9 +704,59 @@ export async function* runFreeTextDiagnosis(
     }
 
     previousOutput = phaseResult
+
+    // Save partial report after phase 3 (scoring) — enables progressive delivery
+    if (phaseDef.phase === 3 && phaseResult && typeof phaseResult === 'object') {
+      const scored = phaseResult as { opportunities?: unknown[] }
+      try {
+        await store.saveReport(reportId, scanId, {
+          opportunities: (scored.opportunities ?? []).map((opp: unknown, i: number) => ({
+            ...(opp as Record<string, unknown>),
+            rank: i + 1,
+            roi_range_min: 0,
+            roi_range_max: 0,
+            loss_per_month: 0,
+            time_to_value: 'A calcular',
+            quick_win: false,
+          })),
+          executive_summary: '',
+          total_roi_min: 0,
+          total_roi_max: 0,
+          cost_of_inaction_monthly: 0,
+          gains_summary: 'Cálculo em andamento...',
+          losses_summary: 'Cálculo em andamento...',
+          sector: syntheticFormData.sector || 'geral',
+          company_name: syntheticFormData.company_name || '',
+        } as unknown as ScanReport)
+        partialReportSaved = true
+      } catch {
+        // Non-fatal — partial save is best-effort
+      }
+    }
+
+    // Save partial report after phase 4 (ranking) — overwrites phase 3 partial
+    if (phaseDef.phase === 4 && phaseResult && typeof phaseResult === 'object') {
+      const ranked = phaseResult as { opportunities?: unknown[]; total_roi_min?: number; total_roi_max?: number; cost_of_inaction_monthly?: number }
+      try {
+        await store.saveReport(reportId, scanId, {
+          opportunities: ranked.opportunities ?? [],
+          executive_summary: '',
+          total_roi_min: ranked.total_roi_min ?? 0,
+          total_roi_max: ranked.total_roi_max ?? 0,
+          cost_of_inaction_monthly: ranked.cost_of_inaction_monthly ?? 0,
+          gains_summary: 'Relatório sendo finalizado...',
+          losses_summary: 'Relatório sendo finalizado...',
+          sector: syntheticFormData.sector || 'geral',
+          company_name: syntheticFormData.company_name || '',
+        } as unknown as ScanReport)
+        partialReportSaved = true
+      } catch {
+        // Non-fatal — partial save is best-effort
+      }
+    }
   }
 
-  // All phases completed
+  // All phases completed — save final report and update status
   await store.saveReport(reportId, scanId, previousOutput as ScanReport)
   await store.updateScanStatus(scanId, 'completed')
 

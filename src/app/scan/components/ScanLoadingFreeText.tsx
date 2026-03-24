@@ -135,6 +135,11 @@ export function ScanLoadingFreeText({ text, onRetry }: ScanLoadingFreeTextProps)
             break
 
           case 'scan_error':
+            // If we have a partial report (phase 3+ completed), redirect to it
+            if (event.reportId) {
+              router.push(`/report/${event.reportId}`)
+              return
+            }
             setStatus('error')
             setErrorMessage(
               'Ocorreu um erro durante o diagnóstico. Por favor, tente novamente.',
