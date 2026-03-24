@@ -94,8 +94,19 @@ Analyze the business form data provided. Extract a structured BUSINESS_PROFILE w
 - Key processes mapped from the form data
 - Business context summary
 
-Output MUST be a valid JSON matching the BusinessProfile type.
+Output MUST be a valid JSON object with EXACTLY this structure (no markdown, no code fences, just raw JSON):
+{
+  "company_name": "string",
+  "sector": "string",
+  "company_size": "string",
+  "tech_maturity": "string",
+  "detected_sector": "string (the sector slug you detected)",
+  "key_processes": ["string", "string", "string"],
+  "business_context": "string (2-3 sentence summary of the business)"
+}
+
 Do NOT invent data — extract only what the user provided.
+Do NOT wrap in markdown code blocks. Return ONLY the raw JSON object.
 Classify the sector based on the data, using the sector context above as reference.`
 }
 
@@ -183,7 +194,21 @@ Given the BUSINESS_PROFILE from the intake phase, analyze and extract a detailed
 - Identify bottleneck types (repetitivo, decisao, integracao, criativo)
 - Determine AI automation potential per process
 
-Output MUST be a valid JSON matching the ProcessMap type.
+Output MUST be a valid JSON object with EXACTLY this structure (no markdown, no code fences, just raw JSON):
+{
+  "processes": [
+    {
+      "name": "string",
+      "category": "ouro|prata|bronze",
+      "time_per_week": number,
+      "pain_level": 1-5,
+      "automation_potential": 0.0-1.0,
+      "opportunities": ["string"]
+    }
+  ]
+}
+
+Minimum 5 processes. Do NOT wrap in markdown code blocks. Return ONLY the raw JSON object.
 Do NOT invent processes — extract and classify only from the business profile data.`
 }
 
@@ -287,7 +312,24 @@ Given the PROCESS_MAP, score each opportunity using the 4D Scoring Engine:
 - Determine automation decision (AUTOMATE/DELEGATE/ELIMINATE/KEEP_MANUAL)
 - Define required guardrails per opportunity
 
-Output MUST be a valid JSON array of ScoredOpportunity objects.
+Output MUST be a valid JSON object with EXACTLY this structure (no markdown, no code fences, just raw JSON):
+{
+  "opportunities": [
+    {
+      "name": "string",
+      "description": "string",
+      "category": "automacao|analise|geracao|integracao|decisao",
+      "impact_score": 1-10,
+      "feasibility_score": 1-10,
+      "effort_score": 1-10,
+      "roi_score": 1-10,
+      "composite_score": number,
+      "guardrails": ["string"]
+    }
+  ]
+}
+
+Minimum 10 opportunities. Do NOT wrap in markdown code blocks. Return ONLY the raw JSON object.
 NEVER score based on gut feeling — use the criteria above.`
 }
 
@@ -382,8 +424,32 @@ Given the SCORED_OPPORTUNITIES, rank and enrich each opportunity:
 - Determine time_to_value and quick_win flag
 - Apply Dopamine Engineering to sequencing
 
-Output MUST be a valid JSON array of RankedOpportunity objects.
+Output MUST be a valid JSON object with EXACTLY this structure (no markdown, no code fences, just raw JSON):
+{
+  "opportunities": [
+    {
+      "name": "string",
+      "description": "string",
+      "category": "string",
+      "impact_score": 1-10,
+      "feasibility_score": 1-10,
+      "effort_score": 1-10,
+      "roi_score": 1-10,
+      "composite_score": number,
+      "guardrails": ["string"],
+      "rank": 1-10,
+      "roi_range_min": number (in BRL/year),
+      "roi_range_max": number (in BRL/year),
+      "loss_per_month": number (in BRL),
+      "time_to_value": "string (e.g. '1-3 meses')",
+      "quick_win": boolean
+    }
+  ]
+}
+
+Exactly 10 opportunities, ranked by composite_score (highest first).
 ROI must be in RANGE (min-max), never a single number.
+Do NOT wrap in markdown code blocks. Return ONLY the raw JSON object.
 NEVER use hedging language ("talvez", "acho que", "poderia").`
 }
 
@@ -515,7 +581,19 @@ Given the RANKED_OPPORTUNITIES and business context, assemble the final report:
 - Highlight top 3 opportunities with contextual descriptions
 - End with CTA for consultoria
 
-Output MUST be a valid JSON matching the ScanReport type.
-The executive_summary field should contain the rendered markdown report.
+Output MUST be a valid JSON object with EXACTLY this structure (no markdown, no code fences, just raw JSON):
+{
+  "executive_summary": "string (the full report text in markdown format)",
+  "opportunities": [same 10 RankedOpportunity objects from input],
+  "total_roi_min": number,
+  "total_roi_max": number,
+  "cost_of_inaction_monthly": number,
+  "gains_summary": "string (what the company GAINS)",
+  "losses_summary": "string (what the company LOSES by not acting)",
+  "sector": "string",
+  "company_name": "string"
+}
+
+Do NOT wrap in markdown code blocks. Return ONLY the raw JSON object.
 NEVER include implementation details, stack, cronograma detalhado, ROI preciso, or prompts.`
 }
