@@ -353,4 +353,51 @@ npm run trace -- workflow-name
 - Document breaking changes prominently
 
 ---
+
+## EI-GAP Project Rules (NON-NEGOTIABLE)
+
+> Estas regras são estratégicas e confidenciais. Este arquivo NUNCA deve ir para o repositório.
+
+### 1. TDD First — Test-Driven Development Obrigatório
+
+- **Sempre usar TDD** para tudo que for possível.
+- Escrever o teste ANTES da implementação.
+- Ciclo: RED (teste falha) → GREEN (implementação mínima) → REFACTOR (limpar).
+- Nenhum código de produção deve ser escrito sem um teste correspondente primeiro.
+- Se não for possível TDD (ex: UI visual pura), documentar o motivo e criar testes de integração depois.
+
+### 2. Roadmap Vivo — `roadmap.md` como Source of Truth
+
+- Manter um arquivo `roadmap.md` na raiz do projeto.
+- O roadmap é o **painel de controle do projeto** — é por ele que o usuário acompanha tudo.
+- **Atualizar o roadmap a cada movimentação:** decisão, ajuste, inserção, conclusão, mudança de escopo, bloqueio — qualquer coisa.
+- Estrutura mínima: fases, status (pendente/em progresso/concluído/bloqueado), decisões tomadas, próximos passos.
+- O roadmap reflete o estado real do projeto, não o plano ideal.
+
+### 3. Agent Teams & Subagents — Paralelismo Sempre que Possível
+
+- **Sempre que puder, usar agent teams ou subagents** para maximizar velocidade e qualidade.
+- Escolher entre Agent (subagent) ou Agent teams baseado no melhor fit para a tarefa.
+- Tarefas independentes devem rodar em paralelo via múltiplos agents.
+- Tarefas que requerem pesquisa + implementação devem separar as fases em agents diferentes.
+- Preferir agents especializados (Explore, Plan) quando o tipo da tarefa combinar.
+
+### 4. Design System — UI/UX Consistente e Obrigatória
+
+- **Sempre se ater ao design system** quando se tratar de UI/UX.
+- Componentes visuais devem seguir o design system definido (react-bits + Tailwind + tokens).
+- Não criar componentes ad-hoc que fogem do padrão visual estabelecido.
+- Cores, tipografia, espaçamento, animações — tudo pelo design system.
+- Se um componente não existe no design system, propor e criar seguindo os padrões antes de usar.
+
+### 5. Escopo Profundo — Pensar como Produção, Não como Protótipo
+
+- **Sempre pensar no escopo de forma aprofundada** quando o usuário pedir algo.
+- Think through what a complete, production-ready implementation requires.
+- Considerar: validação, error handling, edge cases, acessibilidade, performance, segurança.
+- Não entregar implementação superficial que "funciona no happy path" — cobrir os casos reais.
+- Se o escopo for grande, comunicar e dividir em fases — mas nunca ignorar a profundidade.
+- Cada feature entregue deve estar pronta para produção, não ser um rascunho.
+
+---
 *Synkra AIOX Claude Code Configuration v2.0*

@@ -19,6 +19,7 @@ import {
 } from '@/lib/validators/form-validators'
 import {
   getIntakePrompt,
+  getIntakePromptFreeText,
   getExtractionPrompt,
   getScoringPrompt,
   getRankingPrompt,
@@ -437,6 +438,218 @@ export async function* runDiagnosis(
     name: 'report',
     reportId,
   }
+}
+
+// ---------------------------------------------------------------------------
+// Free-text pipeline orchestrator
+// ---------------------------------------------------------------------------
+
+/**
+ * Phase definitions for the free-text pipeline.
+ * Identical to PHASES except Call 1 uses getIntakePromptFreeText and
+ * receives the raw user text instead of structured form data.
+ */
+const FREE_TEXT_PHASES: PhaseDefinition[] = [
+  {
+    name: 'intake',
+    phase: 1,
+    getSystemPrompt: () => getIntakePromptFreeText(),
+    schema: businessProfileSchema,
+    buildUserMessage: (formData) =>
+      `Analyze this free-text business description and extract a structured business profile:\n\n${(formData as unknown as { __freeText: string }).__freeText}`,
+  },
+  // Phases 2-5 are identical to the structured pipeline
+  ...PHASES.slice(1),
+]
+
+/**
+ * Runs the full 5-phase AI diagnosis pipeline from a free-text description.
+ *
+ * This is a thin wrapper that reuses the same pipeline infrastructure as
+ * runDiagnosis, but swaps Call 1 to use the free-text intake prompt.
+ * Calls 2-5 work identically — they receive the same BusinessProfile output.
+ *
+ * Resilience features are identical to runDiagnosis (timeout, retries,
+ * circuit breaker, fallback model, exponential backoff).
+ */
+export async function* runFreeTextDiagnosis(
+  text: string,
+  store: ScanStore,
+  llmClient?: LLMClient,
+): AsyncGenerator<PhaseEvent> {
+  const config = getConfig()
+  const maxRetries = config.openrouter.maxRetries
+  const fallbackModel = config.openrouter.fallbackModel
+  const scanId = nanoid()
+  const reportId = nanoid()
+
+  // Resolve LLM client
+  const llm: LLMClient = llmClient ?? (await getDefaultLLMClient())
+
+  // Build a synthetic ScanFormData-like object to pass through the pipeline.
+  // The free-text phases use __freeText for Call 1, while Calls 2-5 use
+  // company_name and sector from the Call 1 output.
+  const syntheticFormData = {
+    sector: 'generic',
+    company_name: 'Empresa (texto livre)',
+    company_size: '1-10' as const,
+    tech_maturity: 'low' as const,
+    current_tools: undefined,
+    sector_answers: {},
+    processes: [],
+    __freeText: text,
+  } as ScanFormData & { __freeText: string }
+
+  // Save scan to store
+  await store.saveScan(scanId, {
+    sector: 'generic',
+    company_name: 'Empresa (texto livre)',
+    form_data: syntheticFormData,
+    status: 'processing',
+  })
+
+  // Total pipeline timeout tracking
+  const pipelineStartTime = Date.now()
+
+  // Circuit breaker state
+  let consecutiveFailures = 0
+
+  let previousOutput: unknown = null
+
+  for (const phaseDef of FREE_TEXT_PHASES) {
+    // Check total pipeline timeout
+    if (Date.now() - pipelineStartTime >= PIPELINE_TIMEOUT_MS) {
+      const errorMsg = `Pipeline timeout: total execution exceeded ${PIPELINE_TIMEOUT_MS / 1000}s`
+      await store.updateScanStatus(scanId, 'failed', errorMsg)
+      yield { type: 'scan_error', phase: phaseDef.phase, name: phaseDef.name, error: errorMsg }
+      return
+    }
+
+    const startTime = Date.now()
+
+    yield { type: 'phase_start', phase: phaseDef.phase, name: phaseDef.name }
+
+    let phaseResult: unknown = null
+    let succeeded = false
+    let lastError = ''
+    let useFallback = false
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      if (consecutiveFailures >= CIRCUIT_BREAKER_THRESHOLD) {
+        const errorMsg = `Pipeline aborted: circuit breaker tripped after ${CIRCUIT_BREAKER_THRESHOLD} consecutive LLM call failures`
+        await store.updateScanStatus(scanId, 'failed', errorMsg)
+        yield { type: 'scan_error', phase: phaseDef.phase, name: phaseDef.name, error: errorMsg }
+        return
+      }
+
+      if (Date.now() - pipelineStartTime >= PIPELINE_TIMEOUT_MS) {
+        const errorMsg = `Pipeline timeout: total execution exceeded ${PIPELINE_TIMEOUT_MS / 1000}s`
+        await store.updateScanStatus(scanId, 'failed', errorMsg)
+        yield { type: 'scan_error', phase: phaseDef.phase, name: phaseDef.name, error: errorMsg }
+        return
+      }
+
+      try {
+        // For the report phase (Call 5), use data from Call 1 output if available
+        const sectorForPrompt =
+          previousOutput && typeof previousOutput === 'object' && 'detected_sector' in (previousOutput as Record<string, unknown>)
+            ? String((previousOutput as Record<string, unknown>).detected_sector)
+            : syntheticFormData.sector
+
+        const systemPrompt = phaseDef.getSystemPrompt(sectorForPrompt)
+        let userMessage = phaseDef.buildUserMessage(syntheticFormData, previousOutput)
+
+        if (attempt > 0) {
+          userMessage += '\n\nIMPORTANT: Your previous response was invalid. Please return valid JSON matching the required schema. Ensure all required fields are present and values are within allowed ranges.'
+        }
+
+        const modelOverride = useFallback && fallbackModel ? fallbackModel : undefined
+        const response = await llm(systemPrompt, userMessage, modelOverride ? { model: modelOverride } : undefined)
+
+        if (response === null) {
+          lastError = 'LLM returned null response'
+          consecutiveFailures++
+          useFallback = false
+          if (attempt < maxRetries) {
+            yield { type: 'phase_retry', phase: phaseDef.phase, name: phaseDef.name, attempt: attempt + 1, reason: lastError }
+          }
+          continue
+        }
+
+        const parsed = extractJSON(response)
+
+        if (phaseDef.schema) {
+          const result = phaseDef.schema.safeParse(parsed)
+          if (!result.success) {
+            lastError = `Zod validation failed: ${result.error.message}`
+            useFallback = false
+            if (attempt < maxRetries) {
+              yield { type: 'phase_retry', phase: phaseDef.phase, name: phaseDef.name, attempt: attempt + 1, reason: lastError }
+            }
+            continue
+          }
+          phaseResult = result.data
+        } else {
+          phaseResult = parsed
+        }
+
+        consecutiveFailures = 0
+        useFallback = false
+        succeeded = true
+        break
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        lastError = errorMessage
+        consecutiveFailures++
+        useFallback = isEligibleForFallback(error) && !!fallbackModel
+
+        if (isRateLimitError(error) && attempt < maxRetries) {
+          const delay = computeBackoffDelay(attempt)
+          await sleep(delay)
+        }
+
+        if (attempt < maxRetries) {
+          yield { type: 'phase_retry', phase: phaseDef.phase, name: phaseDef.name, attempt: attempt + 1, reason: errorMessage }
+        }
+      }
+    }
+
+    if (!succeeded) {
+      if (consecutiveFailures >= CIRCUIT_BREAKER_THRESHOLD) {
+        const errorMsg = `Pipeline aborted: circuit breaker tripped after ${CIRCUIT_BREAKER_THRESHOLD} consecutive LLM call failures`
+        await store.updateScanStatus(scanId, 'failed', errorMsg)
+        yield { type: 'scan_error', phase: phaseDef.phase, name: phaseDef.name, error: errorMsg }
+        return
+      }
+
+      const errorMsg = `Phase ${phaseDef.name} failed after ${maxRetries} retries: ${lastError}`
+      await store.updateScanStatus(scanId, 'failed', errorMsg)
+      yield { type: 'scan_error', phase: phaseDef.phase, name: phaseDef.name, error: errorMsg }
+      return
+    }
+
+    const durationMs = Date.now() - startTime
+    yield { type: 'phase_complete', phase: phaseDef.phase, name: phaseDef.name, duration_ms: durationMs }
+
+    // After Call 1: update the scan with detected sector/company name
+    if (phaseDef.phase === 1 && phaseResult && typeof phaseResult === 'object') {
+      const profile = phaseResult as Record<string, unknown>
+      if (profile.detected_sector) {
+        syntheticFormData.sector = String(profile.detected_sector)
+      }
+      if (profile.company_name) {
+        syntheticFormData.company_name = String(profile.company_name)
+      }
+    }
+
+    previousOutput = phaseResult
+  }
+
+  // All phases completed
+  await store.saveReport(reportId, scanId, previousOutput as ScanReport)
+  await store.updateScanStatus(scanId, 'completed')
+
+  yield { type: 'scan_complete', phase: 5, name: 'report', reportId }
 }
 
 // ---------------------------------------------------------------------------

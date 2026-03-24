@@ -1,5 +1,5 @@
 import { getSectorProfiles } from '@/lib/data/loader'
-import { ScanForm } from './components/ScanForm'
+import { ScanPageClient } from './components/ScanPageClient'
 
 export const metadata = {
   title: 'AI Gap Scanner | EI-GAP',
@@ -11,7 +11,7 @@ export default function ScanPage() {
 
   return (
     <main className="min-h-screen">
-      <ScanForm sectors={sectors} generic={generic} />
+      <ScanPageClient sectors={sectors} generic={generic} />
     </main>
   )
 }
