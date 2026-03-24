@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-fixture-extraction",
+  "object": "chat.completion",
+  "created": 1700000002,
+  "model": "openai/gpt-4o",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\"processes\":[{\"name\":\"customer_support\",\"time_per_week\":20,\"pain_level\":\"high\",\"opportunities\":[\"chatbot_triage\",\"auto_categorization\"]},{\"name\":\"invoice_processing\",\"time_per_week\":15,\"pain_level\":\"high\",\"opportunities\":[\"ocr_extraction\",\"auto_matching\"]},{\"name\":\"lead_qualification\",\"time_per_week\":10,\"pain_level\":\"medium\",\"opportunities\":[\"scoring_model\",\"auto_enrichment\"]},{\"name\":\"report_generation\",\"time_per_week\":8,\"pain_level\":\"medium\",\"opportunities\":[\"auto_dashboards\",\"narrative_generation\"]},{\"name\":\"data_entry\",\"time_per_week\":12,\"pain_level\":\"high\",\"opportunities\":[\"form_automation\",\"validation_rules\"]}]}"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 400,
+    "completion_tokens": 200,
+    "total_tokens": 600
+  }
+}

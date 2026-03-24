@@ -1,3 +1,8 @@
 {
-  "language": "english"
+  "language": "english",
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "64000",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80"
+  }
 }

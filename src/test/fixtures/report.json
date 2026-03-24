@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-fixture-report",
+  "object": "chat.completion",
+  "created": 1700000005,
+  "model": "openai/gpt-4o",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\"executive_summary\":\"TechCorp Solutions has significant AI automation potential across 5 key business processes. Our analysis identified 10 high-impact opportunities that could reduce operational costs by 25-40% and save approximately 65 hours per week.\",\"opportunities\":[{\"rank\":1,\"name\":\"OCR Invoice Extraction\",\"description\":\"Automated extraction of invoice data using OCR and AI validation\",\"roi\":9.5},{\"rank\":2,\"name\":\"Customer Support Chatbot Triage\",\"description\":\"AI-powered initial customer inquiry routing and resolution\",\"roi\":9.2},{\"rank\":3,\"name\":\"Form Data Automation\",\"description\":\"Intelligent form filling and cross-system data synchronization\",\"roi\":8.9},{\"rank\":4,\"name\":\"Lead Scoring Model\",\"description\":\"ML-based lead qualification and prioritization system\",\"roi\":8.8},{\"rank\":5,\"name\":\"Auto Dashboard Generation\",\"description\":\"AI-generated business intelligence dashboards from raw data\",\"roi\":8.5},{\"rank\":6,\"name\":\"Auto Categorization\",\"description\":\"ML-powered ticket and request categorization\",\"roi\":8.2},{\"rank\":7,\"name\":\"Invoice Auto-Matching\",\"description\":\"Automated PO-to-invoice matching and reconciliation\",\"roi\":7.9},{\"rank\":8,\"name\":\"Lead Auto-Enrichment\",\"description\":\"Automated lead data enrichment from public sources\",\"roi\":7.6},{\"rank\":9,\"name\":\"Narrative Report Generation\",\"description\":\"AI-generated narrative reports from structured data\",\"roi\":7.3},{\"rank\":10,\"name\":\"Data Validation Rules\",\"description\":\"Smart validation rules that learn from historical patterns\",\"roi\":7.0}],\"total_roi\":{\"conservative\":\"15-25%\",\"moderate\":\"25-40%\",\"aggressive\":\"40-60%\"},\"cost_of_inaction\":{\"monthly_waste_hours\":65,\"annual_cost_estimate\":156000,\"competitive_risk\":\"high\",\"summary\":\"Without AI adoption, TechCorp risks falling behind competitors who are projected to achieve 30-40% efficiency gains within the next 12 months.\"}}"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 800,
+    "completion_tokens": 450,
+    "total_tokens": 1250
+  }
+}

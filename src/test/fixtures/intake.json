@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-fixture-intake",
+  "object": "chat.completion",
+  "created": 1700000001,
+  "model": "openai/gpt-4o",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\"company_name\":\"TechCorp Solutions\",\"sector\":\"Technology\",\"size\":\"medium\",\"tech_maturity\":\"intermediate\",\"processes\":[\"customer_support\",\"invoice_processing\",\"lead_qualification\",\"report_generation\",\"data_entry\"]}"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 250,
+    "completion_tokens": 80,
+    "total_tokens": 330
+  }
+}

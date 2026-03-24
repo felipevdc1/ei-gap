@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-fixture-scoring",
+  "object": "chat.completion",
+  "created": 1700000003,
+  "model": "openai/gpt-4o",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\"opportunities\":[{\"name\":\"chatbot_triage\",\"impact\":8,\"feasibility\":7,\"effort\":5,\"roi\":9.2},{\"name\":\"ocr_extraction\",\"impact\":9,\"feasibility\":8,\"effort\":4,\"roi\":9.5},{\"name\":\"scoring_model\",\"impact\":7,\"feasibility\":8,\"effort\":3,\"roi\":8.8},{\"name\":\"auto_dashboards\",\"impact\":6,\"feasibility\":9,\"effort\":2,\"roi\":8.5},{\"name\":\"form_automation\",\"impact\":8,\"feasibility\":7,\"effort\":4,\"roi\":8.9}]}"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 500,
+    "completion_tokens": 180,
+    "total_tokens": 680
+  }
+}

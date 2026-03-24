@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-fixture-ranking",
+  "object": "chat.completion",
+  "created": 1700000004,
+  "model": "openai/gpt-4o",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\"ranked\":[{\"rank\":1,\"name\":\"ocr_extraction\",\"roi\":9.5,\"category\":\"quick_win\"},{\"rank\":2,\"name\":\"chatbot_triage\",\"roi\":9.2,\"category\":\"high_impact\"},{\"rank\":3,\"name\":\"form_automation\",\"roi\":8.9,\"category\":\"quick_win\"},{\"rank\":4,\"name\":\"scoring_model\",\"roi\":8.8,\"category\":\"strategic\"},{\"rank\":5,\"name\":\"auto_dashboards\",\"roi\":8.5,\"category\":\"quick_win\"}],\"roi_ranges\":{\"conservative\":\"15-25%\",\"moderate\":\"25-40%\",\"aggressive\":\"40-60%\"},\"loss_aversion\":{\"monthly_waste_hours\":65,\"annual_cost_estimate\":156000,\"risk_of_inaction\":\"Competitors adopting AI solutions will gain 30-40% efficiency advantage within 12 months\"}}"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 600,
+    "completion_tokens": 250,
+    "total_tokens": 850
+  }
+}
