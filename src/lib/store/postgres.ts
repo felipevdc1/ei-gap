@@ -105,7 +105,11 @@ export class PostgresStore implements ScanStore {
   ): Promise<void> {
     await this.pool.query(
       `INSERT INTO reports (id, scan_id, content, status)
-       VALUES ($1, $2, $3, 'completed')`,
+       VALUES ($1, $2, $3, 'completed')
+       ON CONFLICT (id) DO UPDATE SET
+         content = EXCLUDED.content,
+         status = EXCLUDED.status,
+         updated_at = NOW()`,
       [id, scanId, JSON.stringify(content)]
     )
   }
