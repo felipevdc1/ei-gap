@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   // maxDuration for /api/scan is set via route segment config (export const maxDuration = 120)
   // See: src/app/api/scan/route.ts
 };

@@ -11,18 +11,29 @@ export type {
 export { MemoryStore } from './memory'
 export type { MemoryStoreOptions } from './memory'
 export { SupabaseStore } from './supabase'
+export { PostgresStore } from './postgres'
 
 import { MemoryStore } from './memory'
 import { SupabaseStore } from './supabase'
+import { PostgresStore } from './postgres'
 import type { ScanStore } from './interface'
 
 /**
  * Returns the appropriate ScanStore implementation.
  *
- * - When Supabase env vars are present → SupabaseStore
- * - Otherwise → MemoryStore (default)
+ * Priority:
+ * 1. DATABASE_URL present → PostgresStore (Docker / self-hosted)
+ * 2. Supabase env vars present → SupabaseStore
+ * 3. Otherwise → MemoryStore (default / development)
  */
 function createStore(): ScanStore {
+  const hasDatabaseUrl =
+    typeof process !== 'undefined' && process.env.DATABASE_URL
+
+  if (hasDatabaseUrl) {
+    return new PostgresStore(process.env.DATABASE_URL!)
+  }
+
   const hasSupabase =
     typeof process !== 'undefined' &&
     process.env.NEXT_PUBLIC_SUPABASE_URL &&

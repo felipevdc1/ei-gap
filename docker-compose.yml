@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ei-gap-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-eigap}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-eigap}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./supabase/migrations/001_initial_schema.sql:/docker-entrypoint-initdb.d/001_schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eigap"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ei-gap-internal
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ei-gap-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-eigap}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-eigap}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-google/gemini-2.0-flash-lite-001}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+      NEXT_PUBLIC_CTA_URL: ${NEXT_PUBLIC_CTA_URL:-https://example.com}
+      OPENROUTER_TIMEOUT_MS: ${OPENROUTER_TIMEOUT_MS:-30000}
+      OPENROUTER_MAX_RETRIES: ${OPENROUTER_MAX_RETRIES:-3}
+      RATE_LIMIT_PER_IP: ${RATE_LIMIT_PER_IP:-5}
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - ei-gap-internal
+
+volumes:
+  postgres_data:
+
+networks:
+  ei-gap-internal:
+    driver: bridge

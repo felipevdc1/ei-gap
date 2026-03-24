@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.env
+.env.*
+*.md
+docs/
+e2e/
+src/test/
+**/__tests__/
+**/*.test.*
+**/*.spec.*
+.claude/
+plans/
